@@ -1,31 +1,40 @@
 #!/bin/bash
 
 # Vercel Build Script
-# This script runs during Vercel build process
+set -e  # Exit on error
 
-echo "Starting Vercel build..."
+echo "==> Starting Vercel build..."
 
-# Install Composer dependencies
-if [ -f composer.json ]; then
-    echo "Installing Composer dependencies..."
-    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# Install Composer if not available
+if ! command -v composer &> /dev/null; then
+    echo "==> Installing Composer..."
+    curl -sS https://getcomposer.org/installer | php
+    COMPOSER_BIN="php composer.phar"
+    echo "==> Composer installed successfully"
+else
+    COMPOSER_BIN="composer"
+    echo "==> Composer already available"
 fi
 
-# Install npm dependencies (Vercel handles this automatically)
-echo "Installing npm dependencies..."
+# Install Composer dependencies
+echo "==> Installing Composer dependencies..."
+$COMPOSER_BIN install --no-dev --optimize-autoloader --no-interaction --prefer-dist --ignore-platform-reqs
+
+# Install npm dependencies
+echo "==> Installing npm dependencies..."
 npm ci
 
 # Build frontend assets
-echo "Building frontend assets..."
+echo "==> Building frontend assets..."
 npm run build
 
 # Cache Laravel configuration (if artisan is available)
 if [ -f artisan ]; then
-    echo "Caching Laravel configuration..."
-    php artisan config:cache || true
-    php artisan route:cache || true
-    php artisan view:cache || true
+    echo "==> Caching Laravel configuration..."
+    php artisan config:cache || echo "Config cache failed (non-fatal)"
+    php artisan route:cache || echo "Route cache failed (non-fatal)"
+    php artisan view:cache || echo "View cache failed (non-fatal)"
 fi
 
-echo "Build completed!"
+echo "==> Build completed successfully!"
 
