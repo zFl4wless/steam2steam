@@ -17,12 +17,15 @@
             "dest": "/$1"
         },
         {
-            "src": "/(.*\\.(css|js|json|ico|png|jpg|jpeg|svg|woff|woff2|ttf|eot|map))",
+            "src": "/(.*\\.(css|js|json|ico|png|jpg|jpeg|svg|woff|woff2|ttf|eot|map|txt))",
             "dest": "/$1"
         },
         {
             "src": "/(.*)",
-            "dest": "/api/index.php"
+            "dest": "/api/index.php",
+            "headers": {
+                "cache-control": "no-cache"
+            }
         }
     ],
     "env": {
