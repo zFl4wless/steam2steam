@@ -8,19 +8,7 @@ Route::get('/', function () {
     return Inertia::render('compare', []);
 })->name('home');
 
-// Debug route to test if Laravel is working
-Route::get('api/test', function () {
-    return response()->json([
-        'status' => 'ok',
-        'message' => 'Laravel is working on Vercel!',
-        'timestamp' => now()->toIso8601String(),
-        'request_uri' => request()->getRequestUri(),
-        'request_path' => request()->path(),
-    ]);
-});
-
-// Steam API routes - use full path including 'api/'
-Route::prefix('api/steam')->group(function () {
+Route::prefix('steam')->group(function () {
     Route::post('/resolve', [SteamController::class, 'resolveSteamId']);
     Route::get('/player', [SteamController::class, 'getPlayerData']);
     Route::get('/summary', [SteamController::class, 'getPlayerSummary']);
