@@ -64,6 +64,10 @@ try {
     // This is critical for Vercel where the execution path differs from app structure
     $_ENV['APP_BASE_PATH'] = $basePath;
 
+    // Change working directory to base path
+    // This ensures all relative path operations use the correct base
+    chdir($basePath);
+
     /** @var Application $app */
     $app = require_once $bootstrapPath;
 
@@ -78,11 +82,14 @@ try {
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'base_path' => $basePath,
-            'bootstrap_path' => $basePath . '/bootstrap/app.php',
-            'bootstrap_exists' => file_exists($basePath . '/bootstrap/app.php'),
+            'base_path' => $basePath ?? 'not set',
+            'current_working_dir' => getcwd(),
+            'bootstrap_path' => isset($basePath) ? $basePath . '/bootstrap/app.php' : 'basePath not set',
+            'bootstrap_exists' => isset($basePath) && file_exists($basePath . '/bootstrap/app.php'),
+            'routes_dir_exists' => isset($basePath) && is_dir($basePath . '/routes'),
+            'routes_web_exists' => isset($basePath) && file_exists($basePath . '/routes/web.php'),
             'trace' => explode("\n", $e->getTraceAsString())
-        ]));
+        ], JSON_PRETTY_PRINT));
     } else {
         die(json_encode(['error' => 'Internal server error']));
     }
