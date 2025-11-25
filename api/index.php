@@ -12,7 +12,23 @@ if (getenv('APP_DEBUG') === 'true') {
 define('LARAVEL_START', microtime(true));
 
 // Determine the correct paths for Vercel serverless environment
-$basePath = __DIR__ . '/..';
+// On Vercel, the structure is: /var/task/user/api/index.php
+// So we need to go up one level to reach the app root
+$basePath = realpath(__DIR__ . '/..');
+
+// Debug output if path resolution fails
+if (!$basePath || !file_exists($basePath . '/bootstrap/app.php')) {
+    http_response_code(500);
+    die(json_encode([
+        'error' => 'Base path resolution failed',
+        'attempted_base_path' => __DIR__ . '/..',
+        'resolved_base_path' => $basePath,
+        'current_dir' => __DIR__,
+        'dir_exists' => is_dir(__DIR__ . '/..'),
+        'bootstrap_exists' => file_exists(__DIR__ . '/../bootstrap/app.php'),
+        'files_in_parent' => is_dir(__DIR__ . '/..') ? scandir(__DIR__ . '/..') : [],
+    ]));
+}
 
 // Check if maintenance mode is active
 if (file_exists($maintenance = $basePath . '/storage/framework/maintenance.php')) {
@@ -38,8 +54,14 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 // Bootstrap Laravel and handle the request
 try {
+    $bootstrapPath = $basePath . '/bootstrap/app.php';
+
+    if (!file_exists($bootstrapPath)) {
+        throw new \Exception("Bootstrap file not found at: $bootstrapPath");
+    }
+
     /** @var Application $app */
-    $app = require_once $basePath . '/bootstrap/app.php';
+    $app = require_once $bootstrapPath;
 
     $app->handleRequest(Request::capture());
 } catch (\Throwable $e) {
@@ -50,7 +72,10 @@ try {
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
+            'base_path' => $basePath,
+            'bootstrap_path' => $basePath . '/bootstrap/app.php',
+            'bootstrap_exists' => file_exists($basePath . '/bootstrap/app.php'),
+            'trace' => explode("\n", $e->getTraceAsString())
         ]));
     } else {
         die(json_encode(['error' => 'Internal server error']));
