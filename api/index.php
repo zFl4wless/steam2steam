@@ -2,6 +2,8 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 
 // Enable error reporting for debugging
 if (getenv('APP_DEBUG') === 'true') {
@@ -12,23 +14,15 @@ if (getenv('APP_DEBUG') === 'true') {
 define('LARAVEL_START', microtime(true));
 
 // Determine the correct paths for Vercel serverless environment
-// On Vercel, the structure is: /var/task/user/api/index.php
-// So we need to go up one level to reach the app root
 $basePath = realpath(__DIR__ . '/..');
 
-// Debug output if path resolution fails
-if (!$basePath || !file_exists($basePath . '/bootstrap/app.php')) {
+if (!$basePath) {
     http_response_code(500);
-    die(json_encode([
-        'error' => 'Base path resolution failed',
-        'attempted_base_path' => __DIR__ . '/..',
-        'resolved_base_path' => $basePath,
-        'current_dir' => __DIR__,
-        'dir_exists' => is_dir(__DIR__ . '/..'),
-        'bootstrap_exists' => file_exists(__DIR__ . '/../bootstrap/app.php'),
-        'files_in_parent' => is_dir(__DIR__ . '/..') ? scandir(__DIR__ . '/..') : [],
-    ]));
+    die(json_encode(['error' => 'Failed to resolve base path']));
 }
+
+// Change to base directory immediately
+chdir($basePath);
 
 // Check if maintenance mode is active
 if (file_exists($maintenance = $basePath . '/storage/framework/maintenance.php')) {
@@ -36,44 +30,47 @@ if (file_exists($maintenance = $basePath . '/storage/framework/maintenance.php')
 }
 
 // Register the Composer autoloader
-// Try api/vendor first (Vercel), then root vendor (fallback)
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
 } elseif (file_exists($basePath . '/vendor/autoload.php')) {
     require $basePath . '/vendor/autoload.php';
 } else {
     http_response_code(500);
-    die(json_encode([
-        'error' => 'Composer autoload not found',
-        'checked_paths' => [
-            __DIR__ . '/vendor/autoload.php',
-            $basePath . '/vendor/autoload.php',
-        ]
-    ]));
+    die(json_encode(['error' => 'Composer autoload not found']));
 }
 
 // Bootstrap Laravel and handle the request
 try {
-    $bootstrapPath = $basePath . '/bootstrap/app.php';
+    // Create Application instance directly with base path
+    $app = new Application($basePath);
 
-    if (!file_exists($bootstrapPath)) {
-        throw new \Exception("Bootstrap file not found at: $bootstrapPath");
-    }
+    // Register core bindings
+    $app->singleton(
+        \Illuminate\Contracts\Http\Kernel::class,
+        \Illuminate\Foundation\Http\Kernel::class
+    );
 
-    // Set base path for Laravel before loading
-    // This is critical for Vercel where the execution path differs from app structure
-    $_ENV['APP_BASE_PATH'] = $basePath;
+    $app->singleton(
+        \Illuminate\Contracts\Console\Kernel::class,
+        \Illuminate\Foundation\Console\Kernel::class
+    );
 
-    // Change working directory to base path
-    // This ensures all relative path operations use the correct base
-    chdir($basePath);
+    $app->singleton(
+        \Illuminate\Contracts\Debug\ExceptionHandler::class,
+        \Illuminate\Foundation\Exceptions\Handler::class
+    );
 
-    /** @var Application $app */
-    $app = require_once $bootstrapPath;
+    // Bootstrap the application
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-    // The base path is now set via Application::configure() in bootstrap/app.php
+    $response = $kernel->handle(
+        $request = Request::capture()
+    );
 
-    $app->handleRequest(Request::capture());
+    $response->send();
+
+    $kernel->terminate($request, $response);
+
 } catch (\Throwable $e) {
     http_response_code(500);
     if (getenv('APP_DEBUG') === 'true') {
@@ -82,12 +79,8 @@ try {
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'base_path' => $basePath ?? 'not set',
+            'base_path' => $basePath,
             'current_working_dir' => getcwd(),
-            'bootstrap_path' => isset($basePath) ? $basePath . '/bootstrap/app.php' : 'basePath not set',
-            'bootstrap_exists' => isset($basePath) && file_exists($basePath . '/bootstrap/app.php'),
-            'routes_dir_exists' => isset($basePath) && is_dir($basePath . '/routes'),
-            'routes_web_exists' => isset($basePath) && file_exists($basePath . '/routes/web.php'),
             'trace' => explode("\n", $e->getTraceAsString())
         ], JSON_PRETTY_PRINT));
     } else {
