@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "installCommand": "curl -sS https://getcomposer.org/installer | php && php composer.phar install --no-dev --optimize-autoloader --ignore-platform-reqs && npm install",
-  "buildCommand": "npm run build && php artisan config:cache",
+  "buildCommand": "npm run build",
   "functions": {
     "api/index.php": {
-      "runtime": "vercel-php@0.7.2",
-      "includeFiles": "vendor/**"
+      "runtime": "vercel-php@0.7.2"
     }
   },
   "routes": [
