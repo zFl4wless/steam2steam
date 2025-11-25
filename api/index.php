@@ -67,8 +67,7 @@ try {
     /** @var Application $app */
     $app = require_once $bootstrapPath;
 
-    // Ensure base path is set correctly
-    $app->useBasePath($basePath);
+    // The base path is now set via Application::configure() in bootstrap/app.php
 
     $app->handleRequest(Request::capture());
 } catch (\Throwable $e) {
