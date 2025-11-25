@@ -60,8 +60,15 @@ try {
         throw new \Exception("Bootstrap file not found at: $bootstrapPath");
     }
 
+    // Set base path for Laravel before loading
+    // This is critical for Vercel where the execution path differs from app structure
+    $_ENV['APP_BASE_PATH'] = $basePath;
+
     /** @var Application $app */
     $app = require_once $bootstrapPath;
+
+    // Ensure base path is set correctly
+    $app->useBasePath($basePath);
 
     $app->handleRequest(Request::capture());
 } catch (\Throwable $e) {
