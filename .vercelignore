@@ -1,22 +1,32 @@
-.env
-.env.*
-!.env.example
-/node_modules
-/public/hot
-/public/storage
-/storage/*.key
-/vendor
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
-.DS_Store
+# Environment files
 Thumbs.db
-/.idea
-/.vscode
-*.swp
+.DS_Store
+# Build artifacts
+
+.phpunit.cache
+phpunit.xml
+tests
+# Testing
+
+.gitignore
+.git
+# Git
+
 *.swo
-*~
-.vercel
+*.swp
+.vscode
+.idea
+# IDE files
+
+storage/framework/views/*
+storage/framework/sessions/*
+storage/framework/cache/*
+storage/logs/*
+vendor
+node_modules
+# Development files
+
+!.env.example
+.env.*
+.env
 

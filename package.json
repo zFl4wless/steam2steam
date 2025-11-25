@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
-        "vercel-build": "vite build",
+        "vercel-build": "npm run build",
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
