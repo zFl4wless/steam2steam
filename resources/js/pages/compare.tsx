@@ -877,7 +877,6 @@ export default function Compare() {
                             leftStats={leftDota2}
                             rightStats={rightDota2}
                             gameName="Dota 2"
-                            gameEmoji="⚔️"
                             appId={570}
                         />
                     )}
@@ -890,7 +889,6 @@ export default function Compare() {
                             leftStats={leftTF2}
                             rightStats={rightTF2}
                             gameName="Team Fortress 2"
-                            gameEmoji="🔫"
                             appId={440}
                         />
                     )}
@@ -903,7 +901,6 @@ export default function Compare() {
                             leftStats={leftL4D2}
                             rightStats={rightL4D2}
                             gameName="Left 4 Dead 2"
-                            gameEmoji="🧟"
                             appId={550}
                         />
                     )}
@@ -916,7 +913,6 @@ export default function Compare() {
                             leftStats={leftPortal2}
                             rightStats={rightPortal2}
                             gameName="Portal 2"
-                            gameEmoji="🌀"
                             appId={620}
                         />
                     )}
