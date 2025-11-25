@@ -40,11 +40,8 @@
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp",
 
-        "CACHE_DRIVER": "array",
+        "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie",
-
-        "DB_CONNECTION": "sqlite",
-        "DB_DATABASE": "/tmp/database.sqlite"
+        "SESSION_DRIVER": "cookie"
     }
 }
