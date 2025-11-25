@@ -91,50 +91,6 @@ React 19, TypeScript, and Tailwind CSS.
    php artisan serve
    ```
 
-8. **Visit the application**
-   
-   Open [http://localhost:8000](http://localhost:8000) in your browser
-
----
-
-## 🌐 Deployment
-
-### Deploy to Vercel (Recommended)
-
-Steam2Steam is fully configured for one-click deployment on Vercel:
-
-1. **Push to GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git push -u origin main
-   ```
-
-2. **Import to Vercel**
-   - Visit [vercel.com/new](https://vercel.com/new)
-   - Import your GitHub repository
-   - Vercel auto-detects configuration
-   - Add environment variables (see below)
-   - Click Deploy!
-
-3. **Required Environment Variables**
-   ```env
-   APP_KEY=base64:... (generate: php artisan key:generate --show)
-   STEAM_API_KEY=your_steam_api_key
-   APP_URL=https://your-app.vercel.app
-   ```
-
-📚 **Complete Guide**: See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed instructions, troubleshooting, and optimization tips.
-
-### Alternative Platforms
-
-Steam2Steam can also be deployed to:
-- **Laravel Forge** - Managed Laravel hosting
-- **DigitalOcean App Platform** - Container-based hosting
-- **AWS / Heroku** - Cloud platforms
-- **Any VPS** - Requires PHP 8.2+, Composer, Node.js
-
 ---
 
 ## 🤝 Contributing
