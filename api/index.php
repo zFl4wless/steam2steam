@@ -41,26 +41,14 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 // Bootstrap Laravel and handle the request
 try {
-    // Create Application instance directly with base path
-    $app = new Application($basePath);
+    // Set base path in environment for bootstrap/app.php to use
+    $_ENV['APP_BASE_PATH'] = $basePath;
 
-    // Register core bindings
-    $app->singleton(
-        \Illuminate\Contracts\Http\Kernel::class,
-        \Illuminate\Foundation\Http\Kernel::class
-    );
+    // Use the standard Laravel bootstrap file
+    // This loads all service providers and configuration
+    $app = require_once $basePath . '/bootstrap/app.php';
 
-    $app->singleton(
-        \Illuminate\Contracts\Console\Kernel::class,
-        \Illuminate\Foundation\Console\Kernel::class
-    );
-
-    $app->singleton(
-        \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        \Illuminate\Foundation\Exceptions\Handler::class
-    );
-
-    // Bootstrap the application
+    // Handle the request
     $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
     $response = $kernel->handle(
