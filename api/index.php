@@ -41,14 +41,48 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 // Bootstrap Laravel and handle the request
 try {
-    // Set base path in environment for bootstrap/app.php to use
-    $_ENV['APP_BASE_PATH'] = $basePath;
+    // Create Laravel Application instance with explicit base path
+    $app = new Application($basePath);
 
-    // Use the standard Laravel bootstrap file
-    // This loads all service providers and configuration
-    $app = require_once $basePath . '/bootstrap/app.php';
+    // Bind important paths explicitly
+    $app->useStoragePath($basePath . '/storage');
+    $app->useBootstrapPath($basePath . '/bootstrap');
+    $app->useDatabasePath($basePath . '/database');
+    $app->useConfigPath($basePath . '/config');
+    $app->useAppPath($basePath . '/app');
+    $app->useResourcePath($basePath . '/resources');
+    $app->usePublicPath($basePath . '/public');
 
-    // Handle the request
+    // Register the kernel bindings (using Laravel's default kernels)
+    $app->singleton(
+        \Illuminate\Contracts\Http\Kernel::class,
+        \Illuminate\Foundation\Http\Kernel::class
+    );
+
+    $app->singleton(
+        \Illuminate\Contracts\Console\Kernel::class,
+        \Illuminate\Foundation\Console\Kernel::class
+    );
+
+    $app->singleton(
+        \Illuminate\Contracts\Debug\ExceptionHandler::class,
+        \Illuminate\Foundation\Exceptions\Handler::class
+    );
+
+    // Load service providers from bootstrap/providers.php
+    if (file_exists($basePath . '/bootstrap/providers.php')) {
+        $providers = require $basePath . '/bootstrap/providers.php';
+        foreach ($providers as $provider) {
+            $app->register($provider);
+        }
+    }
+
+    // Manually load routes since we're not using bootstrap/app.php
+    $app->booted(function ($app) use ($basePath) {
+        require $basePath . '/routes/web.php';
+    });
+
+    // Get the kernel and handle the request
     $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
     $response = $kernel->handle(
