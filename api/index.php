@@ -50,7 +50,6 @@ try {
     $app->useDatabasePath($basePath . '/database');
     $app->useConfigPath($basePath . '/config');
     $app->useAppPath($basePath . '/app');
-    $app->useResourcePath($basePath . '/resources');
     $app->usePublicPath($basePath . '/public');
 
     // Register the kernel bindings (using Laravel's default kernels)
