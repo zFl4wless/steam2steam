@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
 
 // Enable error reporting for debugging
 if (getenv('APP_DEBUG') === 'true') {
@@ -54,18 +55,18 @@ try {
 
     // Register the kernel bindings (using Laravel's default kernels)
     $app->singleton(
-        \Illuminate\Contracts\Http\Kernel::class,
-        \Illuminate\Foundation\Http\Kernel::class
+        Kernel::class,
+        Kernel::class
     );
 
     $app->singleton(
-        \Illuminate\Contracts\Console\Kernel::class,
-        \Illuminate\Foundation\Console\Kernel::class
+        Kernel::class,
+        Kernel::class
     );
 
     $app->singleton(
-        \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        \Illuminate\Foundation\Exceptions\Handler::class
+        ExceptionHandler::class,
+        Handler::class
     );
 
     // Load service providers from bootstrap/providers.php
@@ -77,12 +78,12 @@ try {
     }
 
     // Manually load routes since we're not using bootstrap/app.php
-    $app->booted(function ($app) use ($basePath) {
+    $app->booted(function () use ($basePath) {
         require $basePath . '/routes/web.php';
     });
 
     // Get the kernel and handle the request
-    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+    $kernel = $app->make(Kernel::class);
 
     $response = $kernel->handle(
         $request = Request::capture()
@@ -92,7 +93,7 @@ try {
 
     $kernel->terminate($request, $response);
 
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     if (getenv('APP_DEBUG') === 'true') {
         die(json_encode([

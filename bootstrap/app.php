@@ -7,7 +7,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Symfony\Component\HttpFoundation\Request;
 
-// Allow base path override for Vercel serverless environment
 $basePath = $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__);
 
 return Application::configure(basePath: $basePath)
