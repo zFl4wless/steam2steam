@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Contracts\Http\Kernel as KernelContract;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Exceptions\Handler;
+use Illuminate\Foundation\Http\Kernel as KernelFoundation;
 use Illuminate\Http\Request;
 
 // Enable error reporting for debugging
@@ -55,13 +56,13 @@ try {
 
     // Register the kernel bindings (using Laravel's default kernels)
     $app->singleton(
-        Kernel::class,
-        Kernel::class
+        KernelContract::class,
+        KernelFoundation::class
     );
 
     $app->singleton(
-        Kernel::class,
-        Kernel::class
+        KernelContract::class,
+        KernelFoundation::class
     );
 
     $app->singleton(
@@ -83,7 +84,7 @@ try {
     });
 
     // Get the kernel and handle the request
-    $kernel = $app->make(Kernel::class);
+    $kernel = $app->make(KernelContract::class);
 
     $response = $kernel->handle(
         $request = Request::capture()
